@@ -1,0 +1,58 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
+plugins {
+    id 'java'
+}
+
+group = 'ru.artorium'
+version = '1.0'
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+
+    maven { url 'https://papermc.io/repo/repository/maven-public/' }
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+    maven { url 'https://repo.codemc.org/repository/maven-public/' }
+    maven { url 'https://repo.dmulloy2.net/repository/public/' }
+    maven { url 'https://repo.citizensnpcs.co/' }
+    maven { url 'https://mvn.lumine.io/repository/maven-public/' }
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+    sourceCompatibility = "1.8"
+    targetCompatibility = "1.8"
+}
+
+jar {
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+dependencies {
+    compileOnly 'org.projectlombok:lombok:1.18.12'
+    annotationProcessor 'org.projectlombok:lombok:1.18.12'
+
+    compile 'org.mongodb:mongo-java-driver:3.12.8'
+
+    compileOnly 'org.spigotmc:spigot-api:1.15.2-R0.1-SNAPSHOT'
+    compileOnly fileTree(include: ['*.jar'], dir: '/libs')
+
+    compileOnly 'de.tr7zw:item-nbt-api-plugin:2.7.1'
+    compileOnly 'com.comphenix.protocol:ProtocolLib:4.6.0'
+    compileOnly 'com.gmail.filoghost.holographicdisplays:holographicdisplays-api:2.4.0'
+
+    compileOnly 'net.citizensnpcs:citizens-main:2.0.28-SNAPSHOT'
+    compileOnly 'fr.skytasul:beautyquests-core:0.18.5'
+    compileOnly 'io.lumine.xikage:MythicMobs:4.12.0'
+}
+
+
+
+processResources {
+    from(sourceSets.main.resources.srcDirs) {
+        filter ReplaceTokens, tokens: [version: version]
+    }
+}

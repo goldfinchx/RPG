@@ -1,0 +1,6 @@
+name: RPG
+version: @version@
+main: ru.artorium.rpg.RPG
+authors: [Goldfinch]
+api-version: 1.16
+depend: [NBTAPI, Citizens, HolographicDisplays]
