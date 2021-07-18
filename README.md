@@ -11,4 +11,4 @@ One of the most popular game-genre - now in Minecraft!
 📕  80%  
 **Using Resourses**  
 📕  SmartInvs by *MinusKube*  
-📕  Some OpenCode Solutions by *Different Cool Coders*  
+📕  Some OpenCode Solutions by *Different Cool Coders*
