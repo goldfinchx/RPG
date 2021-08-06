@@ -5,9 +5,10 @@ import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import ru.artorium.core.inv.content.SlotPos;
-import ru.artorium.rpg.utils.Colors;
-import ru.artorium.rpg.utils.ItemBuilder;
+import ru.artorium.core.services.inventoryservice.content.SlotPos;
+import ru.artorium.core.utils.ItemBuilder;
+import ru.artorium.core.utils.design.Colors;
+
 
 import java.util.List;
 

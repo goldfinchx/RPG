@@ -6,16 +6,16 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.event.player.PlayerLevelChangeEvent;
+import ru.artorium.core.utils.design.Colors;
 import ru.artorium.rpg.RPG;
 import ru.artorium.rpg.player.obj.PlayerData;
-import ru.artorium.rpg.utils.Colors;
 
 public class LevelsListener implements Listener {
 
     @EventHandler
     public void onLevelUp(PlayerLevelChangeEvent e) {
         Player player = e.getPlayer();
-        PlayerData playerData = RPG.getPlayerData(player.getUniqueId());
+        PlayerData playerData = PlayerData.get(player.getUniqueId());
 
         if (e.getOldLevel() == 0)
             return;
@@ -37,7 +37,7 @@ public class LevelsListener implements Listener {
     @EventHandler
     public void onExpChange(PlayerExpChangeEvent e) {
         Player player = e.getPlayer();
-        PlayerData playerData = RPG.getPlayerData(player.getUniqueId());
+        PlayerData playerData = PlayerData.get(player.getUniqueId());
 
         playerData.setExperience(playerData.getExperience()+e.getAmount());
 

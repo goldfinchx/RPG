@@ -5,16 +5,20 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import ru.artorium.core.inv.ClickableItem;
-import ru.artorium.core.inv.InventoryService;
-import ru.artorium.core.inv.content.InventoryContents;
-import ru.artorium.core.inv.content.InventoryProvider;
-import ru.artorium.rpg.RPG;
+import ru.artorium.core.services.inventoryservice.ClickableItem;
+import ru.artorium.core.services.inventoryservice.InventoryService;
+import ru.artorium.core.services.inventoryservice.content.InventoryContents;
+import ru.artorium.core.services.inventoryservice.content.InventoryProvider;
+import ru.artorium.core.utils.IntegerUtils;
+import ru.artorium.core.utils.ItemBuilder;
+import ru.artorium.core.utils.StringUtils;
+import ru.artorium.core.utils.design.Colors;
+import ru.artorium.core.utils.design.SuperSound;
+import ru.artorium.rpg.PlayerManager;
 import ru.artorium.rpg.player.obj.PlayerData;
 import ru.artorium.rpg.systems.skills_system.ability.obj.RPGAbility;
 import ru.artorium.rpg.systems.skills_system.skill.icon.RPGSkillIcon;
 import ru.artorium.rpg.systems.skills_system.skill.obj.RPGSkill;
-import ru.artorium.rpg.utils.*;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -23,7 +27,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class SkillsMenu {
 
-    private static final ItemStack back = new ItemBuilder(Material.YELLOW_WOOL, (short) 4)
+    private final PlayerData playerData;
+    private final PlayerManager playerManager;
+
+    public SkillsMenu(PlayerData playerData) {
+        this.playerData = playerData;
+        this.playerManager = new PlayerManager(playerData);
+    }
+
+    private final ItemStack back = new ItemBuilder(Material.YELLOW_WOOL, (short) 4)
             .setDisplayName("§eВЕРНУТЬСЯ НАЗАД")
             .setLore(new String[]{
                     "",
@@ -32,15 +44,12 @@ public class SkillsMenu {
             })
             .build();
 
-    public static final InventoryService mainSkillsMenu = InventoryService.builder()
+    public final InventoryService mainSkillsMenu = InventoryService.builder()
             .title("§0Меню навыков")
-            .manager(RPG.getInstance().getInventoryManager())
             .size(6, 9)
             .provider(new InventoryProvider() {
                 @Override
                 public void init(Player player, InventoryContents inventoryContents) {
-                    PlayerData playerData = RPG.getPlayerData(player.getUniqueId());
-
                     for (RPGSkill rpgSkill : RPGSkill.values()) {
                         RPGSkillIcon rpgSkillIcon = rpgSkill.getIcon();
                         ItemStack skillIcon = rpgSkillIcon.getItemIcon();
@@ -49,13 +58,13 @@ public class SkillsMenu {
                         skillIconMeta.setLore(new ArrayList<>());
                         List<String> lore = new ArrayList<>(rpgSkillIcon.getDescription());
 
-                        lore.add("&fУровень &8» &c" + playerData.getSkillLevel(rpgSkill));
-                        lore.add("&fПрогресс уровня &8» " + StringUtils.getProgressString(IntegerUtils.getProcentFromInteger((int) Math.round(playerData.getSkillExperience(rpgSkill)), rpgSkill.getLevels().get(playerData.getSkillLevel(rpgSkill)))));
+                        lore.add("&fУровень &8» &c" + playerManager.getSkillLevel(rpgSkill));
+                        lore.add("&fПрогресс уровня &8» " + StringUtils.getProgressString(IntegerUtils.getProcentFromInteger((int) Math.round(playerManager.getSkillExperience(rpgSkill)), rpgSkill.getLevels().get(playerManager.getSkillLevel(rpgSkill)))));
 
                         skillIconMeta.setLore(Colors.parseColors(lore));
                         skillIcon.setItemMeta(skillIconMeta);
 
-                        skillIcon.setAmount(Math.min(playerData.getSkillLevel(rpgSkill), 64));
+                        skillIcon.setAmount(Math.min(playerManager.getSkillLevel(rpgSkill), 64));
 
                         if (rpgSkillIcon.getNBTString() != null) {
                             NBTItem nbtItem = new NBTItem(skillIcon);
@@ -66,13 +75,12 @@ public class SkillsMenu {
                         inventoryContents.set(rpgSkillIcon.getSlotInMenu(), ClickableItem.of(skillIcon, event ->
                                 InventoryService.builder()
                                 .title(Colors.parseColors("&0Меню способностей " + rpgSkillIcon.getTitle()))
-                                .manager(RPG.getInstance().getInventoryManager())
                                 .parent(mainSkillsMenu)
                                 .size(6, 9)
                                 .provider(new InventoryProvider() {
                                     @Override
                                     public void init(Player player, InventoryContents inventoryContents) {
-                                        PlayerData playerData = RPG.getPlayerData(player.getUniqueId());
+                                        PlayerData playerData = PlayerData.get(player.getUniqueId());
 
                                         inventoryContents.set(5, 3, ClickableItem.of(back, event1 -> mainSkillsMenu.open(player)));
                                         inventoryContents.set(5, 5, ClickableItem.empty(skillIcon));
@@ -84,9 +92,11 @@ public class SkillsMenu {
 
                                             ItemStack abilityMainIcon = new ItemBuilder(Material.GLASS_PANE)
                                                     .setDisplayName("§6" + rpgAbility.getTitle())
-                                                    .setData((short) (playerData.getSkillLevel(rpgSkill) > pointsToFirstLvl ? 5 : 14))
+                                                    .setData((short) (playerManager.getSkillLevel(rpgSkill) > pointsToFirstLvl ? 5 : 14))
                                                     .setLore(rpgAbility.getDescription())
                                                     .build();
+
+
 
                                             inventoryContents.set(raw, 1, ClickableItem.empty(abilityMainIcon));
                                             AtomicInteger abilityLevel = new AtomicInteger(1);
@@ -96,9 +106,9 @@ public class SkillsMenu {
                                                 boolean isUpgradable = false;
                                                 boolean isOpen;
 
-                                                if (playerData.getSkillLevel(rpgSkill) > pointsToOpen) {
+                                                if (playerManager.getSkillLevel(rpgSkill) > pointsToOpen) {
                                                     isOpen = true;
-                                                    isUpgradable = playerData.getAbilityLevel(rpgAbility) < abilityLevel.get();
+                                                    isUpgradable = playerManager.getAbilityLevel(rpgAbility) < abilityLevel.get();
                                                 } else { isOpen = false; }
 
                                                 ItemStack abilityLevelIcon = new ItemBuilder(Material.GLASS_PANE)
@@ -115,7 +125,7 @@ public class SkillsMenu {
                                                 inventoryContents.set(finalRaw, abilityLevel.get()+1, isOpen ? (isUpgradable ? ClickableItem.of(abilityLevelIcon, event1 -> {
                                                     if (playerData.getSkillPoints() >= 1) {
                                                         playerData.setSkillPoints(playerData.getSkillPoints() - 1);
-                                                        playerData.setAbilityLevel(rpgAbility, playerData.getAbilityLevel(rpgAbility) + 1);
+                                                        playerManager.setAbilityLevel(rpgAbility, playerManager.getAbilityLevel(rpgAbility) + 1);
                                                         update(player, inventoryContents);
 
                                                         player.sendMessage("§aУровень " + rpgAbility.getTitle() + " успешно поднят!");

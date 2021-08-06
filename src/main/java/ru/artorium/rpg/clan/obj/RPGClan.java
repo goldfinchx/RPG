@@ -14,11 +14,11 @@ public class RPGClan {
     private final static MongoCollection<Document> clansCollection =
             RPG.getInstance().getMongo().getCollection("clans");
 
-    @Getter@Setter private Document clanDocument;
-    @Getter@Setter private static String name;
-    @Getter@Setter private static String tag;
-    @Getter@Setter private static UUID leader;
-    @Getter@Setter private static List<UUID> members;
+    private Document clanDocument;
+    private static String name;
+    private static String tag;
+    private static UUID leader;
+    private static List<UUID> members;
 
 
     public RPGClan() {

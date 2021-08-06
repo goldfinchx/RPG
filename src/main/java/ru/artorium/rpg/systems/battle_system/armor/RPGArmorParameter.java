@@ -8,6 +8,7 @@ public enum RPGArmorParameter {
 
     BLEEDING_PROTECTION("Защита от кровотечения", "к защите от кровотечения"),
     STUNNING_PROTECTION("Защита от оглушения", "к защите от оглушения"),
+    ADDITIONAL_HEALTH("Дополнительное здоровье", "к здоровью"),
     ;
 
     private final String title;

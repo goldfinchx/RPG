@@ -3,11 +3,11 @@ package ru.artorium.rpg.menus;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import ru.artorium.core.inv.ClickableItem;
-import ru.artorium.core.inv.InventoryService;
-import ru.artorium.core.inv.content.InventoryContents;
-import ru.artorium.core.inv.content.InventoryProvider;
-import ru.artorium.rpg.utils.ItemBuilder;
+import ru.artorium.core.services.inventoryservice.ClickableItem;
+import ru.artorium.core.services.inventoryservice.InventoryService;
+import ru.artorium.core.services.inventoryservice.content.InventoryContents;
+import ru.artorium.core.services.inventoryservice.content.InventoryProvider;
+import ru.artorium.core.utils.ItemBuilder;
 
 public class JoinMenu {
 
@@ -44,16 +44,18 @@ public class JoinMenu {
                     inventoryContents.set(1, 2, ClickableItem.of(withoutRP, event -> player.closeInventory()));
 
                     inventoryContents.set(1, 4, ClickableItem.of(lightRP, event -> {
-                        player.setResourcePack("https://download1525.mediafire.com/vdw4789aan4g/wakxvpho8d7st4r/%5BArtorium%5D+Conquest+Light.zip");
+                        player.setResourcePack("static.artorium.me/artquestlight.rar");
                         player.closeInventory();
                     }));
 
                     inventoryContents.set(1, 6, ClickableItem.of(ultimateRP, event -> {
-                        player.setResourcePack("https://download1321.mediafire.com/bn5kq7gznahg/b9ml00sdjhg8sa8/%5BArtorium%5D+Conquest+Full.zip");
+                        player.setResourcePack("static.artorium.me/artquestultimate.rar");
                         player.closeInventory();
                     }));
-
                 }
+
+                @Override
+                public void update(Player player, InventoryContents contents) { }
             })
             .build();
 }

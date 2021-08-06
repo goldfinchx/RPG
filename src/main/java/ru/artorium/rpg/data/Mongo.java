@@ -1,13 +1,11 @@
 package ru.artorium.rpg.data;
 
-import com.mongodb.*;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import lombok.Getter;
 import org.bson.Document;
-import org.bson.codecs.configuration.CodecRegistries;
-import org.bson.codecs.configuration.CodecRegistry;
-import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Mongo {
@@ -26,13 +24,9 @@ public class Mongo {
         String password = plugin.getConfig().getString("mongo.password");
         String mongoClientURI = "mongodb://" + login + ":" + password + "@" + host + ":" + 27017;
 
-        this.mongoClient = new MongoClient(new MongoClientURI(mongoClientURI));
+        mongoClient = MongoClients.create(mongoClientURI);
 
-        CodecRegistry codecRegistry = CodecRegistries.fromRegistries(
-                MongoClientSettings.getDefaultCodecRegistry(),
-                CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true).build()));
-
-        this.db = mongoClient.getDatabase(dbName).withCodecRegistry(codecRegistry);
+        this.db = mongoClient.getDatabase(dbName);
     }
 
     public MongoCollection<Document> getCollection(String name) { return db.getCollection(plugin.getConfig().getString("mongo.prefix") + name); }

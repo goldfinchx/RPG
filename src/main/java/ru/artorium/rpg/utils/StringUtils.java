@@ -1,5 +1,8 @@
 package ru.artorium.rpg.utils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.TreeMap;
 
 public class StringUtils {
@@ -42,6 +45,33 @@ public class StringUtils {
         }
 
         return progressLineBuilder.toString();
+    }
+
+    public static List<String> splitForLore(String string) {
+        List<String> lore = new ArrayList<>();
+        List<String> dividedWords = new ArrayList<>(Arrays.asList(string.split(" ")));
+
+        int wordCount = dividedWords.size();
+        int lettersCount = 0;
+
+        StringBuilder loreLine = new StringBuilder("§f");
+        for (String word : dividedWords) {
+            if (word.length()+lettersCount < 24) {
+                loreLine.append(word).append(" ");
+                lettersCount += word.length();
+            } else {
+                lore.add(loreLine.toString());
+                loreLine = new StringBuilder("§f");
+                loreLine.append(word).append(" ");
+                lettersCount = word.length();
+                if (wordCount <= 1) {
+                    lore.add(loreLine.toString());
+                }
+            }
+            wordCount--;
+        }
+
+        return lore;
     }
 }
 

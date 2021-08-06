@@ -12,12 +12,4 @@ public enum RPGArmorType {
     HEAVY("Тяжелая броня");
 
     private final String title;
-
-    public static RPGArmorType getByString(String string) {
-        for (RPGArmorType rpgArmorType : RPGArmorType.values())
-            if (rpgArmorType.name().equalsIgnoreCase(string) || rpgArmorType.getTitle().equalsIgnoreCase(string))
-                return rpgArmorType;
-
-        return null;
-    }
 }

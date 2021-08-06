@@ -1,19 +1,25 @@
 package ru.artorium.rpg.menus;
 
+import com.mongodb.BasicDBObject;
+import org.bson.Document;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import ru.artorium.core.inv.ClickableItem;
-import ru.artorium.core.inv.InventoryService;
-import ru.artorium.core.inv.content.InventoryContents;
-import ru.artorium.core.inv.content.InventoryProvider;
-import ru.artorium.core.inv.content.SlotIterator;
-import ru.artorium.rpg.RPG;
-import ru.artorium.rpg.systems.battle_system.obj.RPGItem;
+import ru.artorium.core.services.inventoryservice.ClickableItem;
+import ru.artorium.core.services.inventoryservice.InventoryService;
+import ru.artorium.core.services.inventoryservice.content.InventoryContents;
+import ru.artorium.core.services.inventoryservice.content.InventoryProvider;
+import ru.artorium.core.services.inventoryservice.content.SlotIterator;
+import ru.artorium.core.utils.ItemBuilder;
+import ru.artorium.core.utils.design.Colors;
+import ru.artorium.rpg.player.obj.PlayerData;
+import ru.artorium.rpg.systems.battle_system.ItemsManager;
+import ru.artorium.rpg.systems.battle_system.armor.RPGArmor;
+import ru.artorium.rpg.systems.battle_system.item.RPGItem;
+import ru.artorium.rpg.systems.battle_system.weapon.RPGWeapon;
+import ru.artorium.rpg.systems.battle_system.obj.RPGAbstractItem;
 import ru.artorium.rpg.systems.battle_system.parameters.RPGItemType;
 import ru.artorium.rpg.systems.skills_system.menu.SkillsMenu;
-import ru.artorium.rpg.utils.Colors;
-import ru.artorium.rpg.utils.ItemBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,18 +30,24 @@ public class TestMenu {
     private static final ItemStack forward = new ItemBuilder(Material.ARROW).setDisplayName(Colors.parseColors("&cВПЕРЁД")).build();
 
     public final static InventoryService weaponsMenu = InventoryService.builder()
-            .manager(RPG.getInstance().getInventoryManager())
             .provider(new InventoryProvider() {
                 @Override
                 public void init(Player player, InventoryContents contents) {
-                    RPGItem.loadUpItems();
-
                     List<ClickableItem> icons = new ArrayList<>();
+                    List<RPGWeapon> weapons = new ArrayList<>();
 
-                    for (RPGItem rpgWeapon : RPG.getInstance().getWeapons())
+                    BasicDBObject query = new BasicDBObject();
+                    query.put("itemType", RPGItemType.WEAPON.name());
+
+                    for (Document weaponDocument : RPGAbstractItem.getItemsCollection().find(query)) {
+                        RPGWeapon rpgWeapon = RPGWeapon.get(weaponDocument.getString("_id"));
+                        weapons.add(rpgWeapon);
+                    }
+
+
+                    for (RPGWeapon rpgWeapon : weapons)
                         if (rpgWeapon != null)
                             icons.add(ClickableItem.of(rpgWeapon.getItemStack(), event -> player.getInventory().addItem(rpgWeapon.getItemStack())));
-
 
                     ClickableItem[] iconsArray = new ClickableItem[icons.size()+1];
                     int id = 0;
@@ -62,18 +74,18 @@ public class TestMenu {
             }).build();
 
     public final static InventoryService armorsMenu = InventoryService.builder()
-            .manager(RPG.getInstance().getInventoryManager())
             .provider(new InventoryProvider() {
                 @Override
                 public void init(Player player, InventoryContents contents) {
-                    RPGItem.loadUpItems();
-
                     List<ClickableItem> icons = new ArrayList<>();
+                    List<RPGArmor> armors = new ArrayList<>();
 
-                    for (RPGItem rpgArmor : RPG.getInstance().getArmors())
-                        if (rpgArmor != null)
-                            icons.add(ClickableItem.of(rpgArmor.getItemStack(), event -> player.getInventory().addItem(rpgArmor.getItemStack())));
+                    BasicDBObject query = new BasicDBObject();
+                    query.put("itemType", RPGItemType.ARMOR.name());
 
+                    for (Document weaponDocument : RPGAbstractItem.getItemsCollection().find(query)) {
+                        armors.add(RPGArmor.get(weaponDocument.getString("_id")));
+                    }
 
                     ClickableItem[] iconsArray = new ClickableItem[icons.size()+1];
                     int id = 0;
@@ -99,18 +111,25 @@ public class TestMenu {
 
             }).build();
 
-    public final static InventoryService foodMenu = InventoryService.builder()
-            .manager(RPG.getInstance().getInventoryManager())
+    public final static InventoryService itemsMenu = InventoryService.builder()
             .provider(new InventoryProvider() {
                 @Override
                 public void init(Player player, InventoryContents contents) {
-                    RPGItem.loadUpItems();
-
                     List<ClickableItem> icons = new ArrayList<>();
+                    List<RPGItem> items = new ArrayList<>();
 
-                    for (RPGItem rpgFood : RPG.getInstance().getRpgItems())
-                        if (rpgFood != null && rpgFood.getItemType().equals(RPGItemType.FOOD))
-                            icons.add(ClickableItem.of(rpgFood.getItemStack(), event -> player.getInventory().addItem(rpgFood.getItemStack())));
+                    for (Document itemDocument : RPGAbstractItem.getItemsCollection().find()) {
+                        if (itemDocument.getString("itemType").equalsIgnoreCase("ARMOR"))
+                            continue;
+
+                        if (itemDocument.getString("itemType").equalsIgnoreCase("WEAPON"))
+                            continue;
+
+                        items.add(RPGItem.get(itemDocument.getString("_id")));
+                    }
+
+                    for (RPGItem rpgItem : items)
+                        icons.add(ClickableItem.of(rpgItem.getItemStack(), event -> player.getInventory().addItem(rpgItem.getItemStack())));
 
                     ClickableItem[] iconsArray = new ClickableItem[icons.size()+1];
                     int id = 0;
@@ -124,10 +143,10 @@ public class TestMenu {
                     contents.pagination().addToIterator(contents.newIterator(SlotIterator.Type.HORIZONTAL, 0, 0));
 
                     if (!contents.pagination().isFirst())
-                        contents.set(5, 3, ClickableItem.of(back, event1 -> foodMenu.open(player, contents.pagination().previous().getPage())));
+                        contents.set(5, 3, ClickableItem.of(back, event1 -> itemsMenu.open(player, contents.pagination().previous().getPage())));
 
                     if (!contents.pagination().isLast())
-                        contents.set(5, 5, ClickableItem.of(forward, event1 -> foodMenu.open(player, contents.pagination().next().getPage())));
+                        contents.set(5, 5, ClickableItem.of(forward, event1 -> itemsMenu.open(player, contents.pagination().next().getPage())));
 
                 }
 
@@ -139,16 +158,14 @@ public class TestMenu {
 
     public final static InventoryService testInventory = InventoryService.builder()
             .title("TEST")
-            .manager(RPG.getInstance().getInventoryManager())
             .size(5, 9)
             .provider(new InventoryProvider() {
                 @Override
                 public void init(Player player, InventoryContents contents) {
-
                     contents.add(ClickableItem.of(new ItemBuilder(Material.IRON_SWORD).setDisplayName(Colors.parseColors("&cМеню оружия")).build(), event -> weaponsMenu.open((Player) event.getWhoClicked())));
                     contents.add(ClickableItem.of(new ItemBuilder(Material.IRON_HELMET).setDisplayName(Colors.parseColors("&cМеню брони")).build(), event -> armorsMenu.open((Player) event.getWhoClicked())));
-                    contents.add(ClickableItem.of(new ItemBuilder(Material.POTATO).setDisplayName(Colors.parseColors("&cМеню навыков")).build(), event -> foodMenu.open(player)));
-                    contents.add(ClickableItem.of(new ItemBuilder(Material.REDSTONE).setDisplayName(Colors.parseColors("&cМеню навыков")).build(), event -> SkillsMenu.mainSkillsMenu.open(player)));
+                    contents.add(ClickableItem.of(new ItemBuilder(Material.POTATO).setDisplayName(Colors.parseColors("&cМеню предметов")).build(), event -> itemsMenu.open((Player) event.getWhoClicked())));
+                    contents.add(ClickableItem.of(new ItemBuilder(Material.REDSTONE).setDisplayName(Colors.parseColors("&cМеню навыков")).build(), event -> new SkillsMenu(PlayerData.get(player.getUniqueId())).mainSkillsMenu.open(player)));
 
                 }
 
