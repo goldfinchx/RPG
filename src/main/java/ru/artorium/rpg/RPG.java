@@ -6,8 +6,6 @@ import io.lumine.xikage.mythicmobs.MythicMobs;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
-import ru.artorium.core.Bungee;
-import ru.artorium.core.utils.ReflectionUtils;
 import ru.artorium.rpg.commands.TestCommand;
 import ru.artorium.rpg.data.Mongo;
 import ru.artorium.rpg.player.listener.LevelsListener;
@@ -15,7 +13,8 @@ import ru.artorium.rpg.player.listener.PlayerListener;
 import ru.artorium.rpg.systems.battle_system.BattleSystem;
 import ru.artorium.rpg.systems.battle_system.listener.BattleListener;
 import ru.artorium.rpg.systems.skills_system.listener.SkillsListener;
-
+import ru.artorium.rpg.utils.Bungee;
+import ru.artorium.rpg.utils.ReflectionUtils;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

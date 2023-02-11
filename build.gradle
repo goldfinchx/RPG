@@ -35,7 +35,7 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.12'
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
 
-    compile 'org.mongodb:mongo-java-driver:3.12.8'
+    compileOnly 'org.mongodb:mongo-java-driver:3.12.8'
 
     compileOnly 'org.spigotmc:spigot-api:1.15.2-R0.1-SNAPSHOT'
     compileOnly fileTree(include: ['*.jar'], dir: '/libs')
@@ -48,7 +48,6 @@ dependencies {
     compileOnly 'fr.skytasul:beautyquests-core:0.18.5'
     compileOnly 'io.lumine.xikage:MythicMobs:4.12.0'
 }
-
 
 
 processResources {
